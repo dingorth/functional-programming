@@ -1,0 +1,16 @@
+let m = 10;;
+let f x = m + x;;
+let m = 100;;
+
+
+What's the value of f 1 expression in enviroment, after procesing above instructions and why?
+
+# f 1;;
+- : int = 11
+
+1) najpierw identyfikator m związany z wartością 10.
+2) więc w definicji f, m zostało związane  wartością m.
+3) potem z identyfikatorem m wiążemy wartość 100.
+
+Tutaj nie ma zmiennych jako "komórki" pamięci,
+ale identyfikatory które muszą być związane z wartością.
