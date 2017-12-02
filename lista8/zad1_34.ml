@@ -67,6 +67,7 @@ let int_queue_sort l =
 
 (* -------------------------------------------------------------------------- *)
 (* http://caml.inria.fr/pub/docs/manual-ocaml/extn.html#sec244 *)
+(* https://realworldocaml.org/v1/en/html/first-class-modules.html *)
 (* Usage: *)
 (* sort (module OrdInt) [5;4;2;5];; *)
 
