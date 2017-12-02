@@ -49,10 +49,8 @@ struct
 
 end
 
-(* defining IntPQueue module for int_queue_sort *)
-module IntPQueue = PQueue(OrdInt);;
-
 let int_queue_sort l = 
+    let module IntPQueue = PQueue(OrdInt) in
     let rec aux q = function
         | [] -> q
         | x::xs -> aux (IntPQueue.insert q x x) xs
@@ -67,3 +65,21 @@ let int_queue_sort l =
     in 
     aux' (aux IntPQueue.empty l)
 
+(* -------------------------------------------------------------------------- *)
+(* Usage: *)
+(* sort (module OrdInt) [5;4;2;5];; *)
+
+let sort (type s) (module Ord : ORDTYPE with type t = s) l =
+    let module Queue = PQueue(Ord) in
+    let rec to_queue q = function
+        | [] -> q
+        | x::xs -> to_queue (Queue.insert q x x) xs
+    and
+    from_queue q = 
+        try
+            match Queue.remove q with
+            | _, e, q' -> e :: from_queue q'
+        with
+            Queue.EmptyPQueue -> []
+    in
+        from_queue (to_queue Queue.empty l)

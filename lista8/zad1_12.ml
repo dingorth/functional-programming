@@ -10,9 +10,9 @@ sig
     val remove : 'a t -> priority * 'a * 'a t
 end	
 
-module PQueue : PQUEUE with type priority = int = 
+(* smallest priority on top *)
+module PQueue : PQUEUE with type priority = int = (* czemu musze dac type priority = int ?? *)
 struct
-
     type priority = int
     type 'a t = (priority * 'a) list
 
