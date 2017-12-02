@@ -66,6 +66,7 @@ let int_queue_sort l =
     aux' (aux IntPQueue.empty l)
 
 (* -------------------------------------------------------------------------- *)
+(* http://caml.inria.fr/pub/docs/manual-ocaml/extn.html#sec244 *)
 (* Usage: *)
 (* sort (module OrdInt) [5;4;2;5];; *)
 
