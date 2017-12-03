@@ -37,9 +37,7 @@ struct
   type vertex = Vertex.t
   type t = vertex * label * vertex
 
-  let compare e1 e2 = match e1, e2 with (v1l,_,v1r), (v2l,_,v2r) -> 
-    let cmp1 = Pervasives.compare v1l v2l in
-    if cmp1 == 0 then (Pervasives.compare v1r v2r) else cmp1
+  let compare = Pervasives.compare
   let create v1 l v2 = (v1,l,v2)
   let label e = match e with (_,l,_) -> l
   let src = function (v,_,_) -> v
@@ -133,4 +131,29 @@ let graph = IntGraph.empty;;
 let v1 = Vertex.create 1;;
 let v2 = Vertex.create 2;;
 let e12 = Edge.create v1 "1 -> 2" v2;;
-let graph = IntGraph.add_e graph e12;
+let graph = IntGraph.add_e graph e12;;
+let v1succ = IntGraph.succ graph v1 |> List.map Vertex.label;;
+let v1succ_e = IntGraph.succ_e graph v1 |> List.map Edge.label;;
+let e21 = Edge.create v2 "2 -> 1" v1;;
+let graph = IntGraph.add_e graph e21;; (* cycle *)
+let e21' = Edge.create v2 "2 -> 1'" v1;;
+let graph = IntGraph.add_e graph e21';; (* double edge *)
+let found_v1_v2 = IntGraph.find_e graph v1 v2 |> IntGraph.E.label;;
+
+let dfs graph startNode =
+  let rec search visited = function
+    [] -> []
+    | h::t -> if List.mem h visited then search visited t
+      else h::search (h::visited) (IntGraph.succ graph h @ t)
+    in 
+      search [] [startNode];;
+
+let bfs graph startNode =
+  let rec search visited = function
+    | [] -> []
+    | h::t -> if List.mem h visited 
+      then search visited t
+      else h::search (h::visited) (t @ IntGraph.succ graph h)
+  in 
+    search [] [startNode];;
+

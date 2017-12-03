@@ -71,7 +71,7 @@ let int_queue_sort l =
 (* Usage: *)
 (* sort (module OrdInt) [5;4;2;5];; *)
 
-let sort (type s) (module Ord : ORDTYPE with type t = s) l =
+let sort (type s) (module Ord : ORDTYPE with type t = s) (l : s list) =
     let module Queue = PQueue(Ord) in
     let rec to_queue q = function
         | [] -> q
