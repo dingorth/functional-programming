@@ -8,7 +8,7 @@ sig
   val label : t -> label  
 end
 
-module IntVertex : VERTEX =
+module Vertex : VERTEX with type label = int =
 struct
   type label = int
   type t = label
@@ -17,7 +17,6 @@ struct
   let create l = l
   let label v = v
 
-  let compare v1 v2 = Pervasives.compare v1 v2 (* for Set.Make to work *)
 end
 
 module type EDGE = 
@@ -33,10 +32,10 @@ sig
   val dst : t -> vertex
 end
 
-module IntVertexEdge : EDGE with type vertex = IntVertex.t = 
+module Edge : EDGE with type vertex = Vertex.t = 
 struct
   type label = string
-  type vertex = IntVertex.t
+  type vertex = Vertex.t
   type t = vertex * label * vertex
 
   let equal e1 e2 = e1 == e2
@@ -45,7 +44,6 @@ struct
   let src = function (v,_,_) -> v
   let dst = function (_,_,v) -> v
 
-  let compare e1 e2 = Pervasives.compare e1 e2 (* for Set.Make to work *)
 end
 
 module type GRAPH =
@@ -57,7 +55,6 @@ module type GRAPH =
   type vertex = V.t
 
   module E : EDGE with type vertex = vertex
-
   type edge = E.t
 
   (* funkcje wyszukiwania *)
@@ -82,23 +79,21 @@ module type GRAPH =
   (* val fold_e : (edge -> 'a -> 'a) -> t -> 'a -> 'a *)
 end
 
-module IntGraph : GRAPH =
+module IntGraph : GRAPH with module V = Vertex and module E = Edge =
 struct
 
-  module V = IntVertex
+  module V = Vertex
   type vertex = V.t
 
-  module E = IntVertexEdge
+  module E = Edge
   type edge = E.t
 
-  module EdgeSet = Set.Make(E)
-  module VerticesSet = Set.Make(V)
+  type t = edge list * vertex list
 
-  type t = EdgeSet.t * VerticesSet.t
-
-  (* let mem_v g v = VerticesSet.find *)
-
-  
+  (* funkcje modyfikacji *) 
+  let empty = ([],[])
+  let add_v g v = (fst g, v::snd g)
+  let add_e g e = (e::fst g, E.src e :: E.dst e :: snd g)
 
 
 end

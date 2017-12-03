@@ -21,7 +21,7 @@ sig
   val dst : t -> vertex
 end
 
-module IntVertex : VERTEX with type label = int = 
+module Vertex : VERTEX with type label = int = 
 struct
   type label = int
   type t = label
@@ -31,13 +31,15 @@ struct
   let label v = v
 end
 
-module IntVertexEdge : EDGE with type vertex = IntVertex.t =
+module Edge : EDGE with type vertex = Vertex.t and type label = string =
 struct
   type label = string
-  type vertex = IntVertex.t
+  type vertex = Vertex.t
   type t = vertex * label * vertex
 
-  let compare = Pervasives.compare
+  let compare e1 e2 = match e1, e2 with (v1l,_,v1r), (v2l,_,v2r) -> 
+    let cmp1 = Pervasives.compare v1l v2l in
+    if cmp1 == 0 then (Pervasives.compare v1r v2r) else cmp1
   let create v1 l v2 = (v1,l,v2)
   let label e = match e with (_,l,_) -> l
   let src = function (v,_,_) -> v
@@ -57,15 +59,28 @@ sig
 
   (* funkcje wyszukiwania *)
   val mem_v : t -> vertex -> bool
+  val mem_e : t -> edge -> bool
+  val mem_e_v : t -> vertex -> vertex -> bool
+  val find_e : t -> vertex -> vertex -> edge
+  val succ : t -> vertex -> vertex list
+  val pred : t -> vertex -> vertex list
+  val succ_e : t -> vertex -> edge list
+  val pred_e : t -> vertex -> edge list
 
   (* funkcje modyfikacji *) 
   val empty : t
   val add_e : t -> edge -> t
   val add_v : t -> vertex -> t
+  val rem_e : t -> edge -> t
+  val rem_v : t -> vertex -> t
+
+  (* iteratory *)
+  val fold_v : (vertex -> 'a -> 'a) -> t -> 'a -> 'a
+  val fold_e : (edge -> 'a -> 'a) -> t -> 'a -> 'a
 end
 
-(* GRAPH with type vertex = Vertex.t and type edge = Edge.t *)
-module Graph (Vertex : VERTEX) (Edge : EDGE with type vertex = Vertex.t) : GRAPH =
+module Graph (Vertex : VERTEX) (Edge : EDGE with type vertex = Vertex.t) 
+  : GRAPH with module V = Vertex and module E = Edge =
 struct
   module V = Vertex
   type vertex = V.t
@@ -78,18 +93,44 @@ struct
 
   type t = VSet.t * ESet.t
 
+  exception EdgeNotFound
+
   let vertices g = fst g
   let edges g = snd g
 
-  let mem_v g v = 
-  try 
-    VSet.find v (vertices g); true
-  with
-    Not_found -> false 
+  let mem_v g v = VSet.mem v (vertices g)
+  let mem_e g e = ESet.mem e (edges g)
+
+  let mem_e_v g v1 v2 = 
+    if ESet.elements @@ ESet.filter (fun e -> E.src e == v1 && E.dst e == v2) (edges g) == [] 
+    then false 
+    else true
+
+  let find_e g v1 v2 = 
+    let el = ESet.elements @@ ESet.filter (fun e -> E.src e == v1 && E.dst e == v2) (edges g) in
+    if el == [] 
+    then raise EdgeNotFound 
+    else List.hd el
 
   let empty = (VSet.empty, ESet.empty)
   let add_e g e = let vertices' = VSet.add (E.src e) (vertices g) in
     (VSet.add (E.dst e) (vertices'), ESet.add e (edges g))
-  let add_v g v = (VSet.add v (vertices g), edges g)
 
+  let add_v g v = (VSet.add v (vertices g), edges g)
+  let rem_e g e = (vertices g, ESet.remove e (edges g))
+  let rem_v g v = (VSet.remove v (vertices g), edges g)
+  let fold_v f g s = VSet.fold f (vertices g) s
+  let fold_e f g s = ESet.fold f (edges g) s
+  let succ_e g v = ESet.elements @@ ESet.filter (fun e -> E.src e == v) (edges g)
+  let pred_e g v = ESet.elements @@ ESet.filter (fun e -> E.dst e == v) (edges g)
+  let succ g v = List.map E.dst @@ succ_e g v
+  let pred g v = List.map E.src @@ pred_e g v
 end
+
+module IntGraph = Graph (Vertex) (Edge);;
+
+let graph = IntGraph.empty;;
+let v1 = Vertex.create 1;;
+let v2 = Vertex.create 2;;
+let e12 = Edge.create v1 "1 -> 2" v2;;
+let graph = IntGraph.add_e graph e12;
