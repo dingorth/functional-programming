@@ -157,3 +157,4 @@ let bfs graph startNode =
   in 
     search [] [startNode];;
 
+(* https://www.math.nagoya-u.ac.jp/~garrigue/papers/ml2010-show.pdf *)
