@@ -1,3 +1,5 @@
+(* static graph module *)
+
 module type VERTEX =
 sig
   type t

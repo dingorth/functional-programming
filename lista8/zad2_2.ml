@@ -1,3 +1,5 @@
+(* dynamic graph module *)
+
 module type VERTEX =
 sig
   type t
@@ -140,7 +142,7 @@ let e21' = Edge.create v2 "2 -> 1'" v1;;
 let graph = IntGraph.add_e graph e21';; (* double edge *)
 let found_v1_v2 = IntGraph.find_e graph v1 v2 |> IntGraph.E.label;;
 
-let dfs graph startNode =
+let int_graph_dfs graph startNode =
   let rec search visited = function
     [] -> []
     | h::t -> if List.mem h visited then search visited t
@@ -148,7 +150,7 @@ let dfs graph startNode =
     in 
       search [] [startNode];;
 
-let bfs graph startNode =
+let int_graph_bfs graph startNode =
   let rec search visited = function
     | [] -> []
     | h::t -> if List.mem h visited 
@@ -158,3 +160,35 @@ let bfs graph startNode =
     search [] [startNode];;
 
 (* https://www.math.nagoya-u.ac.jp/~garrigue/papers/ml2010-show.pdf *)
+
+let dfs' (type a) (type b) (type c)
+  (module Vertex : VERTEX with type t = a) 
+  (module Edge : EDGE with type vertex = a and type t = b) 
+  (module Graph : GRAPH with type V.t = a and type E.t = b and type t = c)
+  (g : c) (v : a) =
+  failwith "d"
+
+(* dfs (module IntGraph) graph v1;; *)
+let dfs (type a) (type b) 
+  (module Graph : GRAPH with type t = a and type V.t = b) 
+  (graph : a) (startNode : b) =
+    let rec search visited = function
+    [] -> []
+    | h::t -> if List.mem h visited then search visited t
+      else h::search (h::visited) (Graph.succ graph h @ t)
+    in 
+      search [] [startNode]
+
+(* bfs (module IntGraph) graph v1;; *)
+let bfs (type a) (type b)
+  (module Graph : GRAPH with type t = a and type V.t = b)
+  (graph : a) (startNode : b) =
+    let rec search visited = function
+    | [] -> []
+    | h::t -> if List.mem h visited 
+      then search visited t
+      else h::search (h::visited) (t @ Graph.succ graph h)
+    in 
+      search [] [startNode];;
+
+

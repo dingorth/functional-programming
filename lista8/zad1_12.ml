@@ -1,3 +1,5 @@
+(* static PQueue module *)
+
 module type PQUEUE =
 sig
     type priority
