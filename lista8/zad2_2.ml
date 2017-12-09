@@ -161,6 +161,7 @@ let int_graph_bfs graph startNode =
 
 (* https://www.math.nagoya-u.ac.jp/~garrigue/papers/ml2010-show.pdf *)
 
+(* useless ?? *)
 let dfs' (type a) (type b) (type c)
   (module Vertex : VERTEX with type t = a) 
   (module Edge : EDGE with type vertex = a and type t = b) 

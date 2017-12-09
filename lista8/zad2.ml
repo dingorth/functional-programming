@@ -18,7 +18,6 @@ struct
   let equal v1 v2 = v1 == v2
   let create l = l
   let label v = v
-
 end
 
 module type EDGE = 
@@ -34,7 +33,7 @@ sig
   val dst : t -> vertex
 end
 
-module Edge : EDGE with type vertex = Vertex.t = 
+module Edge : EDGE with type vertex = Vertex.t and type label = string = 
 struct
   type label = string
   type vertex = Vertex.t
